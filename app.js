@@ -27,11 +27,10 @@ app.post("/login", (req, res) => {
         if (foundUser.password === password) {
             res.send("Login Successful");
         }
-
     });
 })
 
-// ADD NEW USER
+// CREATE NEW USER
 app.post("/register", (req, res) => {
     const name = req.body.name;
     const username = req.body.username;
@@ -47,7 +46,7 @@ app.post("/register", (req, res) => {
     res.send(newUser);
 });
 
-// ADD NEW TASK
+// CREATE NEW TASK
 app.post("/addtask", (req, res) => {
     const title = req.body.title;
     const desc = req.body.desc;
@@ -59,10 +58,27 @@ app.post("/addtask", (req, res) => {
         desc: desc,
         dueDate: dueDate,
         assignedUser: assignedUser
-    })
+    });
 
     newTask.save().then(console.log)
     res.send(newTask);
+})
+
+// READ ALL TASKS
+app.get("/tasks", (req, res) => {
+    Task.find().then((allTasks) => {
+        console.log(allTasks);
+        res.send(allTasks);
+    }); 
+})
+
+// UPDATE TASK
+app.put("/updatetask", (req, res) => {
+    const filter = {title: "Title"};
+    const update = {desc: "Desc Updated"};
+    Task.findOneAndUpdate(filter, update).then((result)=>{
+        res.send(result);
+    });
 })
 
 app.listen(port, () => {
