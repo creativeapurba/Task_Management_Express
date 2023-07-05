@@ -9,7 +9,13 @@ mongoose.connect("mongodb://127.0.0.1:27017/taskManagement")
     .then(() => console.log('MongoDB Connected!'));
 
 const userSchema = new mongoose.Schema({ name: String, username: String, password: String });
-const taskSchema = new mongoose.Schema({ title: String, desc: String, dueDate: Date, assignedUser: String });
+const taskSchema = new mongoose.Schema({ 
+    title: String, 
+    desc: String, 
+    dueDate: Date, 
+    status:String, 
+    assignedUser: String 
+});
 
 const User = mongoose.model('User', userSchema);
 const Task = mongoose.model('Task', taskSchema);
@@ -51,12 +57,14 @@ app.post("/addtask", (req, res) => {
     const title = req.body.title;
     const desc = req.body.desc;
     const dueDate = req.body.dueDate;
+    const status = req.body.status,
     const assignedUser = req.body.assignedUser;
 
     const newTask = new Task({
         title: title,
         desc: desc,
         dueDate: dueDate,
+        status: status,
         assignedUser: assignedUser
     });
 
