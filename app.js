@@ -8,8 +8,8 @@ app.use(express.json());
 mongoose.connect("mongodb://127.0.0.1:27017/taskManagement")
     .then(() => console.log('MongoDB Connected!'));
 
-const userSchema = new mongoose.Schema({ name: String, username: String, password: String })
-const taskSchema = new mongoose.Schema({ title: String, desc: String, dueDate: Date, assignedUser: String })
+const userSchema = new mongoose.Schema({ name: String, username: String, password: String });
+const taskSchema = new mongoose.Schema({ title: String, desc: String, dueDate: Date, assignedUser: String });
 
 const User = mongoose.model('User', userSchema);
 const Task = mongoose.model('Task', taskSchema);
@@ -51,7 +51,7 @@ app.post("/addtask", (req, res) => {
     const title = req.body.title;
     const desc = req.body.desc;
     const dueDate = req.body.dueDate;
-    const assignedUser = req.body.assigned;
+    const assignedUser = req.body.assignedUser;
 
     const newTask = new Task({
         title: title,
@@ -77,6 +77,15 @@ app.put("/updatetask", (req, res) => {
     const filter = {title: "Title"};
     const update = {desc: "Desc Updated"};
     Task.findOneAndUpdate(filter, update).then((result)=>{
+        res.send(result);
+    });
+});
+
+// DELETE TASK
+app.delete("/deletetask", (req, res) => {
+    const filter = {title: "Title"};
+
+    Task.findOneAndDelete(filter).then((result)=>{
         res.send(result);
     });
 })
