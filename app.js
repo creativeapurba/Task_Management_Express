@@ -1,18 +1,20 @@
 const express = require("express");
-const bodyparser = require("body-parser");
+// const bodyparser = require("body-parser");
+const cors = require('cors')
 const mongoose = require("mongoose");
 const app = express();
-const port = 3000;
+const port = 3333;
 
 app.use(express.json());
+app.use(cors({origin:"http://localhost:3000"}))
 mongoose.connect("mongodb://127.0.0.1:27017/taskManagement")
     .then(() => console.log('MongoDB Connected!'));
 
-const userSchema = new mongoose.Schema({ name: String, username: String, password: String });
+const userSchema = new mongoose.Schema({ name: String, email: String, password: String });
 const taskSchema = new mongoose.Schema({ 
     title: String, 
     desc: String, 
-    dueDate: Date, 
+    dueDate: String, 
     status:String, 
     assignedUser: String 
 });
@@ -27,24 +29,31 @@ app.get("/", (req, res) => {
 
 // LOGIN 
 app.post("/login", (req, res) => {
-    const username = req.body.username;
+    const email = req.body.email;
     const password = req.body.password;
-    User.findOne({ username: username }).then((foundUser) => {
-        if (foundUser.password === password) {
+    User.findOne({ email: email }).then((foundUser) => {
+        // console.log(foundUser);
+        if(foundUser === null){
+            res.status(401).send("User Not Found")
+        }
+        else if (foundUser.password === password) {
             res.send("Login Successful");
         }
-    });
+        else{
+            res.status(401).send("Login Unuccessful")
+        }
+    }).catch(console.log);
 })
 
 // CREATE NEW USER
 app.post("/register", (req, res) => {
     const name = req.body.name;
-    const username = req.body.username;
+    const email = req.body.email;
     const password = req.body.password;
 
     const newUser = new User({
         name: name,
-        username: username,
+        email: email,
         password: password
     })
 
@@ -52,12 +61,20 @@ app.post("/register", (req, res) => {
     res.send(newUser);
 });
 
+// READ ALL USERS
+app.get("/users", (req, res) => {
+    User.find().then((allUsers) => {
+        console.log(allUsers);
+        res.send(allUsers);
+    }); 
+})
+
 // CREATE NEW TASK
 app.post("/addtask", (req, res) => {
     const title = req.body.title;
     const desc = req.body.desc;
     const dueDate = req.body.dueDate;
-    const status = req.body.status,
+    const status = req.body.status;
     const assignedUser = req.body.assignedUser;
 
     const newTask = new Task({
@@ -82,8 +99,9 @@ app.get("/tasks", (req, res) => {
 
 // UPDATE TASK
 app.put("/updatetask", (req, res) => {
-    const filter = {title: "Title"};
-    const update = {desc: "Desc Updated"};
+    const filter = {_id: req.body._id};
+    console.log(req.body._id);
+    const update = req.body;
     Task.findOneAndUpdate(filter, update).then((result)=>{
         res.send(result);
     });
@@ -91,7 +109,7 @@ app.put("/updatetask", (req, res) => {
 
 // DELETE TASK
 app.delete("/deletetask", (req, res) => {
-    const filter = {title: "Title"};
+    const filter = {_id: req.body._id};
 
     Task.findOneAndDelete(filter).then((result)=>{
         res.send(result);
